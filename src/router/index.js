@@ -6,6 +6,7 @@ import Usuario from "../views/admin/usuario/Usuario.vue"
 import Blog from "../views/Blog.vue"
 import AppLayout from "../layout/AppLayout.vue"
 import SitioLayout from "../layout/SitioLayout.vue"
+import CategoriaView from "../views/admin/categoria/Categoria.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -55,6 +56,12 @@ const router = createRouter({
           path: 'usuario',
           name: 'Usuario',
           component: Usuario,
+          meta: {requireAuth: true}
+        },
+        {
+          path: 'categoria',
+          name: 'Categoria',
+          component: CategoriaView,
           meta: {requireAuth: true}
         },
       ]
