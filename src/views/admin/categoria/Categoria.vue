@@ -49,12 +49,18 @@
         />
       </template>
     </Dialog>
-
+    <input type="text" v-model="buscar" @keyup.enter="getCategorias">
+    
     <DataTable :value="categorias" tableStyle="min-width: 50rem">
       <Column field="id" header="COD"></Column>
       <Column field="nombre" header="NOMBRE CATEGORIA"></Column>
       <Column field="detalle" header="DETALLE"></Column>
-      <Column field="acciones" header="ACCIONES"></Column>
+      <Column :exportable="false" style="min-width:8rem">
+        <template #body="slotProps">
+              <Button icon="pi pi-pencil" severity="warning" class="mr-2" @click="editarCategoria(slotProps.data)" />
+              <Button icon="pi pi-trash" severity="danger" @click="confirmDeleteCategoria(slotProps.data)" />
+        </template>
+      </Column>
     </DataTable>
     <hr />
     <br />
@@ -98,32 +104,50 @@ import catService from "./../../../services/categoria.service";
 const categorias = ref([]);
 const categoria = ref({});
 const visible = ref(false);
-const errors = ref({})
+const errors = ref({});
+const buscar = ref('')
 
 onMounted(() => {
   getCategorias();
 });
 
 async function getCategorias() {
-  const res = await catService.index();
+  const res = await catService.index(buscar.value);
   categorias.value = res.data;
 }
 
 const guardarCategoria = async function () {
     try {
-        const res = await catService.store(categoria.value);
-      
-        visible.value = false;
-        categoria.value = {};
-      
-        getCategorias();
-        Swal.fire({
-          title: "Categoria Registrada!",
-          text: "ok para continuar!",
-          icon: "success",
-        });
-      
-        console.log(res);
+        if(categoria.value.id){
+          // MODIFICAR
+          const res = await catService.update(categoria.value.id, categoria.value);
+          visible.value = false;
+          categoria.value = {};
+        
+          getCategorias();
+          Swal.fire({
+            title: "Categoria Actualizada!",
+            text: "ok para continuar!",
+            icon: "success",
+          });
+
+        }else{
+          // GUARDAR
+          const res = await catService.store(categoria.value);
+        
+          visible.value = false;
+          categoria.value = {};
+        
+          getCategorias();
+          Swal.fire({
+            title: "Categoria Registrada!",
+            text: "ok para continuar!",
+            icon: "success",
+          });
+        
+          console.log(res);
+
+        }
         
     } catch (error) {
         if(error.response.status != 422){
@@ -139,6 +163,20 @@ const guardarCategoria = async function () {
         }
     }
 };
+
+const editarCategoria = (cat) => {
+  categoria.value = cat
+
+  visible.value = true;
+}
+
+const confirmDeleteCategoria = async (cat) => {
+  if(confirm("¿Está seguro de eliminar la categoria?")){
+    const res = await catService.destroy(cat.id);
+    console.log(res);
+    getCategorias()
+  }
+}
 
 const getCategorias3 = () => {};
 </script>

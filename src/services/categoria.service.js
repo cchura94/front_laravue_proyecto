@@ -1,8 +1,8 @@
 import { Api } from "./api.service"
 
 export default {
-    index(){
-        return Api().get("/categoria");
+    index(q=''){
+        return Api().get("/categoria?q="+q);
     },
     store(datos){
         return Api().post("/categoria", datos);
