@@ -7,6 +7,7 @@ import Blog from "../views/Blog.vue"
 import AppLayout from "../layout/AppLayout.vue"
 import SitioLayout from "../layout/SitioLayout.vue"
 import CategoriaView from "../views/admin/categoria/Categoria.vue"
+import Producto from "../views/admin/producto/Producto.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +63,12 @@ const router = createRouter({
           path: 'categoria',
           name: 'Categoria',
           component: CategoriaView,
+          meta: {requireAuth: true}
+        },
+        {
+          path: 'producto',
+          name: 'Producto',
+          component: Producto,
           meta: {requireAuth: true}
         },
       ]
