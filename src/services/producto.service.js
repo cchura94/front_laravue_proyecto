@@ -18,4 +18,8 @@ export default {
         return Api().delete(`/producto/${id}`);
     },
 
+    actualizaImagen(id, formData){
+        return Api().post(`/producto/${id}/carga-imagen`, formData)
+    }
+
 }
