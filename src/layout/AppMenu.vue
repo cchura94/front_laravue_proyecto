@@ -27,8 +27,8 @@ const model = ref([
     {
         label: 'Gestión Pedidos',
         items: [
-            { label: 'Nuevo Pedido', icon: 'pi pi-fw pi-prime', to: '/utilities/icons' },
-            { label: 'Pedidos', icon: 'pi pi-fw pi-desktop', url: 'https://www.primefaces.org/primeflex/', target: '_blank' },
+            { label: 'Nuevo Pedido', icon: 'pi pi-fw pi-prime', to: '/admin/pedido/nuevo' },
+            { label: 'Pedidos', icon: 'pi pi-fw pi-desktop', to: '/admin/pedido' },
             { label: 'Clientes', icon: 'pi pi-fw pi-users', to: '/admin/cliente' },
         ]
     }

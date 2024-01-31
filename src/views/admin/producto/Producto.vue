@@ -6,8 +6,8 @@
                     <Button label="Nuevo" icon="pi pi-plus" severity="success" class="mr-2" @click="openNuevo" />
                 </template>
                 <template #end>
-                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
-                    <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)"  />
+                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Importar" chooseLabel="Import" class="mr-2 inline-block" />
+                    <Button label="Exportar" icon="pi pi-upload" severity="help" @click="exportCSV($event)"  />
                 </template>
             </Toolbar>
     
@@ -28,7 +28,7 @@
                 <Column field="nombre" header="Nombre" sortable style="min-width:16rem"></Column>
                 <Column header="Image">
                     <template #body="slotProps">
-                        <img :src="`http://127.0.0.1:8000/${slotProps.data.imagen}`" :alt="slotProps.data.imagen" class="border-round" style="width: 64px" />
+                        <Image :src="`http://127.0.0.1:8000/${slotProps.data.imagen}`" alt="Image" width="64px" preview />
                     </template>
                 </Column>
                 <Column field="precio" header="Precio" sortable style="min-width:8rem">
@@ -46,7 +46,7 @@
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-image" @click="editImagen(slotProps.data)" />
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editProduct(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editarProducto(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteProduct(slotProps.data)" />
                     </template>
                 </Column>
@@ -56,7 +56,7 @@
         </div>
         
         <Dialog v-model:visible="productDialog" :style="{width: '450px'}" header="Datos Producto" :modal="true" class="p-fluid">
-            <img v-if="producto.imagen" :src="`https://primefaces.org/cdn/primevue/images/product/${producto.imagen}`" :alt="producto.imagen" class="block m-auto pb-3" />
+            <img v-if="producto.imagen" :src="`http://127.0.0.1:8000/${producto.imagen}`" :alt="producto.imagen" class="block m-auto pb-3" width="150px" />
             
             <div class="field">
                 <label for="name">Nombre</label>
@@ -101,16 +101,26 @@
 
         
 
-<Dialog v-model:visible="visibleImagen" modal header="Imagen" :style="{ width: '25rem' }">
-    <span class="p-text-secondary block mb-5">Actualizar Imagen.</span>
-
-    <input type="file" @change="onImagenSeleccionado">
-            <button type="button" @click="actualizarImagen()">Subir Imagen</button>
-    
-    <div class="flex justify-content-end gap-2">
-        <Button type="button" label="Cancel" severity="secondary" @click="visibleImagen = false"></Button>
-        <Button type="button" label="Save" @click="visibleImagen = false"></Button>
+<Dialog v-model:visible="visibleImagen" modal header="Actualizar Imagen" :style="{ width: '50rem' }">
+   
+    <div class="grid">
+        <div class="col-8">
+            <FileUpload @uploader="onAdvancedUpload($event)" :multiple="true" accept="image/*" customUpload :maxFileSize="1000000">
+                <template #empty>
+                    <p>Drag and drop files to here to upload.</p>
+                </template>
+            </FileUpload>
+        </div>
+        <div class="col-4">
+            <Image :src="`http://127.0.0.1:8000/${producto.imagen}`" alt="Image" width="100%" preview />
+        </div>
     </div>
+
+
+<!--
+    <input type="file" @change="onImagenSeleccionado">
+    <button type="button" @click="actualizarImagen()">Subir Imagen</button>
+-->
 </Dialog>
         </div>
 </template>
@@ -119,6 +129,9 @@
     import { ref, onMounted } from "vue"
     import productoService from "@/services/producto.service"
     import categoriaService from "@/services/categoria.service";
+    import Swal from "sweetalert2";
+
+    const dt = ref();
 
     const productos = ref([])
     const totalRecords = ref(0)
@@ -172,29 +185,57 @@
 
     const guardarProducto = async () => {
 
-        try {
-            submitted.value = true;
-            if(producto.value.nombre){
-                
-                producto.value.estado = true
-                const {data} = await productoService.guardar(producto.value)
-        
-                productDialog.value = false
-        
-                getProductos()
+        if(producto.value.id){
+            // editar
+
+            try {
+                submitted.value = true;
+                if(producto.value.nombre){
+                    
+                    producto.value.estado = true
+                    const {data} = await productoService.modificar(producto.value.id, producto.value)
+            
+                    productDialog.value = false
+            
+                    getProductos()
+                }
+            } catch (error) {
+                if(error.response.status == 422){
+                    errors.value = error.response.data.errors;
+                }else{
+                    alert("Error al registrar el Producto")
+                }
             }
-        } catch (error) {
-            if(error.response.status == 422){
-                errors.value = error.response.data.errors;
-            }else{
-                alert("Error al registrar el Producto")
+
+        }else{
+            // guardar
+            try {
+                submitted.value = true;
+                if(producto.value.nombre){
+                    
+                    producto.value.estado = true
+                    const {data} = await productoService.guardar(producto.value)
+            
+                    productDialog.value = false
+            
+                    getProductos()
+                }
+            } catch (error) {
+                if(error.response.status == 422){
+                    errors.value = error.response.data.errors;
+                }else{
+                    alert("Error al registrar el Producto")
+                }
             }
         }
 
+
     }
 
-    const editarProducto = () => {
-
+    const editarProducto = (prod) => {
+        producto.value = prod;
+        productDialog.value = true
+        submitted.value = false;
     }
 
     const eliminarProducto = () => {
@@ -253,4 +294,44 @@
         visibleImagen.value = true
         producto.value = prod
     }
+
+    const onAdvancedUpload =async (event) => {
+        imagenSeleccionada.value = event.files[0]
+        let fd = new FormData();
+        fd.append("imagen", imagenSeleccionada.value);
+
+        await productoService.actualizaImagen(producto.value.id, fd);
+
+        visibleImagen.value = false
+        getProductos()
+    }
+
+    const confirmDeleteProduct = (prod) => {
+        Swal.fire({
+            title: "¿Está seguro de Inactivar el producto?",
+            text: "Al aceptar cambiar el estado del producto!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, cambiar estado!"
+            }).then(async (result) => {
+            if (result.isConfirmed) {
+
+                const {data} = await productoService.eliminar(prod.id)
+
+                Swal.fire({
+                title: "Correcto!",
+                text: "El Producto se ha inactivado.",
+                icon: "success"
+                });
+
+                getProductos();
+            }
+            });
+    }
+
+    const exportCSV = () => {
+        dt.value.exportCSV();
+    };
 </script>

@@ -8,6 +8,8 @@ import AppLayout from "../layout/AppLayout.vue"
 import SitioLayout from "../layout/SitioLayout.vue"
 import CategoriaView from "../views/admin/categoria/Categoria.vue"
 import Producto from "../views/admin/producto/Producto.vue"
+import ListaPedido from "../views/admin/pedido/ListaPedido.vue"
+import NuevoPedido from "../views/admin/pedido/NuevoPedido.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +71,18 @@ const router = createRouter({
           path: 'producto',
           name: 'Producto',
           component: Producto,
+          meta: {requireAuth: true}
+        },
+        {
+          path: 'pedido',
+          name: 'Pedido',
+          component: ListaPedido,
+          meta: {requireAuth: true}
+        },
+        {
+          path: 'pedido/nuevo',
+          name: 'NuevoPedido',
+          component: NuevoPedido,
           meta: {requireAuth: true}
         },
       ]
