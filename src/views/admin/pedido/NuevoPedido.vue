@@ -95,7 +95,7 @@
                                 <Textarea id="description" v-model="pedido.observacion" rows="3" cols="20" />
                             </div>
           
-                            <Button label="Guardar Nuevo Pedido" rounded severity="info" @click="clienteDialog=true" />
+                            <Button label="Guardar Nuevo Pedido" rounded severity="info" @click="registrarPedido()" />
                         </div>
 
                     </div>
@@ -136,6 +136,7 @@ import { ref, onMounted } from "vue"
     import productoService from "@/services/producto.service"
 import Swal from "sweetalert2";
 import clienteService from "@/services/cliente.service"
+import pedidoService from "@/services/pedido.service"
 
 const dt = ref();
 
@@ -260,4 +261,28 @@ const dt = ref();
         cliente.value = {};
     }
 
+    const registrarPedido = async () => {
+        if(cliente_seleccionado.value.id){
+            if(confirm("¿Está seguro de guardar este pedido?")){
+
+                let prods = [] 
+                carrito.value.forEach((prod) => {
+                    prods.push({producto_id: prod.producto_id, cantidad: prod.cantidad})
+                })
+
+                const pe = {
+                    cliente_id: cliente_seleccionado.value.id,
+                    productos: prods,
+                    observacion: pedido.value.observacion        
+                }
+                const {data} = await pedidoService.store(pe)
+                alert("Pedido Registrado");
+
+                cliente_seleccionado.value = {}
+                carrito.value = [];
+            }
+        }else{
+            alert("Falta Cliente");
+        }
+    }
 </script>
