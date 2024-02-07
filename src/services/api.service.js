@@ -5,7 +5,8 @@ let local = "dev";
 let urlBase = ""
 
 if(local == 'dev'){
-    urlBase = "http://127.0.0.1:8000/api"
+    // urlBase = "http://127.0.0.1:8000/api"
+    urlBase = "//lv.blumbit.net/back/public/api/"
 }if(local == 'prod'){
     urlBase = "http://miempresa.com"
 }if(local == 'test'){

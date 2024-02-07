@@ -26,7 +26,7 @@
     <Column :exportable="false" style="min-width:8rem">
         <template #body="slotProps">
             <Button icon="pi pi-table" rounded class="mr-2" @click="mostrarPedido(slotProps.data)" />
-            <Button icon="pi pi-pdf" rounded severity="success" @click="generarPedidoPDF(slotProps.data)" />
+            <Button icon="pi pi-file-pdf" severity="danger" @click="generarPedidoPDF(slotProps.data)" />
         </template>
     </Column>
 </DataTable>
@@ -64,6 +64,8 @@
 
 import pedidoService from '@/services/pedido.service';
 import { onMounted, ref } from 'vue';
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const pedidos = ref([])
 const totalRecords = ref(0)
@@ -88,6 +90,51 @@ const mostrarPedido = (data) => {
     pedido.value = data
 }
 const generarPedidoPDF = (data) => {
+    const doc = new jsPDF()
+
+    let posX = 15;
+    let posY = 20;
+
+    doc.setFontSize(12);
+    doc.text("PEDIDO: "+data.id, posX, posY);
+
+    doc.text("Fecha: "+data.fecha, posX + 80, posY);
+    posY += 10;
+    doc.text("ESTADO: "+data.estado, posX + 80, posY);
+    posY += 10;
+    doc.setFontSize(11);
+    doc.text("Cliente: ", posX, posY);
+    doc.setFontSize(10);
+
+    doc.text("Nombre: "+data.cliente.nombre_completo, posX, posY+7);
+    doc.text("Ci/NIT: "+data.cliente.ci_nit, posX, posY+14);
+    doc.text("Telefono: "+data.cliente.telefono, posX, posY+21);
+    doc.text("Direccion: "+data.cliente.direccion, posX, posY+28);
+
+    let columnas = [
+        {header: "ID", dataKey: "id"},
+        {header: "Producto", dataKey: "nombre"},
+        {header: "Cantidad", dataKey: "cantidad"},
+        {header: "Precio", dataKey: "precio"},
+    ]
+
+    data.productos.forEach(prod => {
+        let cant = prod.pivot.cantidad;
+        prod.cantidad = cant
+    });
+    
+
+    doc.autoTable(columnas, data.productos, {
+        startY: posY+40,
+        theme: "grid"
+    })
+
+
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    // doc.save('table.pdf')
 
 }
 </script>
